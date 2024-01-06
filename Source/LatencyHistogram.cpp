@@ -87,7 +87,8 @@ void LatencyHistogram::handleTTLEvent(TTLEventPtr event)
     if (stream != nullptr)
     {
 
-        const int line = event->getLine();
+        // convert to 1-based line numbers
+        const int line = event->getLine() + 1;
         double timeInMs = event->getSampleNumber() / stream->getSampleRate() * 1000.0f;
         
 		const int ttl_a = stream->getParameter("ttl_a")->getValue();

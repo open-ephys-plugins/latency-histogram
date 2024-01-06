@@ -83,7 +83,7 @@ void LatencyHistogramEditor::startAcquisition()
 {
 	for (auto hist : histograms)
 	{
-		hist->startTimer(100);
+		hist->startTimer(10);
 	}
 }
 
