@@ -24,7 +24,7 @@
 
 
 Histogram::Histogram(uint16 streamId_)
-    : baseColour(Colours::orange),
+    : baseColour(Colours::darkorange.darker()),
       streamId(streamId_)
 {
    
@@ -53,7 +53,7 @@ void Histogram::resized()
     histogramWidth = getWidth();
     histogramHeight = getHeight();
     
-    statsLabel->setBounds(histogramWidth - 85, 10, 85, 45);
+    statsLabel->setBounds(5, 5, 100, 45);
 	hoverLabel->setBounds(histogramWidth - 85, histogramHeight - 33, 85, 25);
     
     
@@ -185,7 +185,7 @@ void Histogram::recount(bool full)
 
         }
 
-        statsLabel->setText("samples: " + String(numTrials) + "\nmean: " + String(mean, 0, false) + " ms"
+        statsLabel->setText("samples: " + String(numTrials) + "\nmean: " + String(mean, 1, false) + " ms"
             + "\nstd: " + String(std, 1, false) + " ms", dontSendNotification);
     }
     else {
@@ -219,7 +219,7 @@ void Histogram::timerCallback()
 void Histogram::paint(Graphics& g)
 {
 
-    g.fillAll(Colour(30,30,40));
+    g.fillAll(Colour(25,25,25));
 
     const int nBins = binEdges.size() - 1;
     float binWidth = histogramWidth / float(nBins);
@@ -229,7 +229,7 @@ void Histogram::paint(Graphics& g)
     for (int i = 0; i < nBins; i++)
     {
         if (hoverBin == i)
-            g.setColour(plotColour.withAlpha(0.85f));
+            g.setColour(plotColour.darker().withAlpha(0.85f));
         else
             g.setColour(plotColour);
 

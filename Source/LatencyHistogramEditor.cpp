@@ -27,7 +27,7 @@ LatencyHistogramEditor::LatencyHistogramEditor(GenericProcessor* parentNode)
     : GenericEditor(parentNode)
 {
     
-    addComboBoxParameterEditor("ttl_a", 15, 35);
+    addComboBoxParameterEditor("ttl_a", 15, 30);
     addComboBoxParameterEditor("ttl_b", 15, 75);
     
     desiredWidth = 270;
