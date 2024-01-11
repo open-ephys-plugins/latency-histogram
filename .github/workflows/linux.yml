@@ -1,0 +1,50 @@
+name: linux
+
+on: 
+  push:
+
+jobs:
+
+  build-linux:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup
+        run: |
+          sudo apt update
+          cd ../..
+          git clone https://github.com/open-ephys/plugin-GUI.git --branch main
+          sudo ./plugin-GUI/Resources/Scripts/install_linux_dependencies.sh
+          cd plugin-GUI/Build && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+      - name: build
+        run: |
+          conda env list
+          cd Build
+          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+          make
+  #    - name: test
+  #      run: cd build && ctest
+      - name: package
+        env:
+          build_dir: "Build"
+          package: LatencyHistogram-linux
+        run: |
+          plugin_api=$(grep -rnw ../../plugin-GUI/Source -e '#define PLUGIN_API_VER' | grep -Eo "[0-9]*" | tail -1)
+          tag=$(grep -w Source/OpenEphysLib.cpp -e 'info->libVersion' | grep -Eo "[0-9]+.[0-9]+.[0-9]+")
+          new_plugin_ver=$tag-API$plugin_api
+          mkdir plugins 
+          cp -r $build_dir/*.so plugins
+          zipfile=${package}_${new_plugin_ver}.zip
+          echo "zipfile=${zipfile}" >> $GITHUB_ENV
+          zip -r -X $zipfile plugins
+      - name: deploy
+        if: github.ref == 'refs/heads/main'
+        env:
+          artifactoryApiKey: ${{ secrets.artifactoryApiKey }}
+        run: |
+          curl -H "X-JFrog-Art-Api:$artifactoryApiKey" -T ${{ env.zipfile }} "https://openephys.jfrog.io/artifactory/LatencyHistogram-plugin/linux/${{ env.zipfile }}"

@@ -1,0 +1,47 @@
+name: mac
+
+on: 
+  push:
+
+jobs:
+
+  build-mac:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: setup
+      run: |
+        cd ../..
+        git clone https://github.com/open-ephys/plugin-GUI.git --branch main
+        cd plugin-GUI/Build && cmake -G "Xcode" ..
+    - name: build
+      run: |
+        cd Build
+        cmake -G "Xcode" ..
+        xcodebuild -configuration Release
+#    - name: test
+#      run: cd build && ctest
+    - name: package
+      env:
+        build_dir: "Build/Release"
+        package: LatencyHistogram-mac
+      run: |
+        plugin_api=$(grep -rnw ../../plugin-GUI/Source -e '#define PLUGIN_API_VER' | grep -Eo "[0-9]" | tail -1)
+        tag=$(grep -w Source/OpenEphysLib.cpp -e 'info->libVersion' | grep -Eo "[0-9]+.[0-9]+.[0-9]+")
+        new_plugin_ver=$tag-API$plugin_api
+        mkdir plugins 
+        cp -r $build_dir/*.bundle plugins
+        zipfile=${package}_${new_plugin_ver}.zip
+        echo "zipfile=${zipfile}" >> $GITHUB_ENV
+        zip -r -X $zipfile plugins
+    - name: deploy
+      if: github.ref == 'refs/heads/main'
+      env:
+        artifactoryApiKey: ${{ secrets.artifactoryApiKey }}
+      run: |
+        curl -H "X-JFrog-Art-Api:$artifactoryApiKey" -T ${{ env.zipfile }} "https://openephys.jfrog.io/artifactory/LatencyHistogram-plugin/mac/${{ env.zipfile }}"
