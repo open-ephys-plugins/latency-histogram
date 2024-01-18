@@ -1,5 +1,7 @@
 # Latency Histogram
 
+![Latency Histogram Editor](https://open-ephys.github.io/gui-docs/_images/latencyhistogram-01.png)
+
 Displays a histogram of latencies between events on two TTL lines.
 
 ## Installation
