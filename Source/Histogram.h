@@ -103,7 +103,6 @@ private:
     
     Array<int> counts;
 
-    Colour baseColour;
     int hoverBin = -1;
     
     int pre_ms;

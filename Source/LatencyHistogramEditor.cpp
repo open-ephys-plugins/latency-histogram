@@ -27,10 +27,16 @@ LatencyHistogramEditor::LatencyHistogramEditor(GenericProcessor* parentNode)
     : GenericEditor(parentNode)
 {
     
-    addComboBoxParameterEditor("ttl_a", 15, 30);
-    addComboBoxParameterEditor("ttl_b", 15, 75);
+    addTtlLineParameterEditor (Parameter::STREAM_SCOPE, "ttl_a", 15, 30);
+    addTtlLineParameterEditor (Parameter::STREAM_SCOPE, "ttl_b", 15, 75);
+
+	for (auto ed : parameterEditors)
+	{
+		ed->setLayout (ParameterEditor::Layout::nameOnTop);
+		ed->setSize (75, 40);
+	}
     
-    desiredWidth = 270;
+    desiredWidth = 260;
 
 }
 
@@ -44,7 +50,7 @@ void LatencyHistogramEditor::updateSettings()
 	{
 		Histogram* h = new Histogram(stream->getStreamId());
 		histograms.add(h);
-		h->setBounds(115, 30, 150, 90);
+		h->setBounds(105, 30, 150, 90);
 		addAndMakeVisible(h);
 	}
 

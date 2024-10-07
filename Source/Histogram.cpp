@@ -24,22 +24,19 @@
 
 
 Histogram::Histogram(uint16 streamId_)
-    : baseColour(Colours::darkorange.darker()),
-      streamId(streamId_)
+    : streamId(streamId_)
 {
    
     
     hoverLabel = std::make_unique<Label>("hover label");
     hoverLabel->setJustificationType(Justification::topLeft);
     hoverLabel->setFont(11);
-    hoverLabel->setColour(Label::textColourId, Colours::white);
     hoverLabel->addMouseListener(this, true);
     addAndMakeVisible(hoverLabel.get());
 
     statsLabel = std::make_unique<Label>("stats label");
     statsLabel->setJustificationType(Justification::topLeft);
     statsLabel->setFont(11);
-    statsLabel->setColour(Label::textColourId, Colours::white);
     statsLabel->addMouseListener(this, true);
     addAndMakeVisible(statsLabel.get());
 
@@ -50,8 +47,8 @@ Histogram::Histogram(uint16 streamId_)
 void Histogram::resized()
 {
     
-    histogramWidth = getWidth();
-    histogramHeight = getHeight();
+    histogramWidth = getWidth() - 2;
+    histogramHeight = getHeight() - 2;
     
     statsLabel->setBounds(5, 5, 100, 45);
 	hoverLabel->setBounds(histogramWidth - 85, histogramHeight - 33, 85, 25);
@@ -219,12 +216,14 @@ void Histogram::timerCallback()
 void Histogram::paint(Graphics& g)
 {
 
-    g.fillAll(Colour(25,25,25));
+    auto localBounds = getLocalBounds().toFloat().reduced(1.0f);
+    g.setColour (findColour (ThemeColours::widgetBackground));
+    g.fillRoundedRectangle (localBounds, 3.0f);
 
     const int nBins = binEdges.size() - 1;
     float binWidth = histogramWidth / float(nBins);
     
-    Colour plotColour = baseColour;
+    Colour plotColour = findColour (ThemeColours::highlightedFill);
 
     for (int i = 0; i < nBins; i++)
     {
@@ -235,19 +234,14 @@ void Histogram::paint(Graphics& g)
 
         float x = binWidth * i;
         float relativeHeight = float(counts[i]) / float(maxCount);
-        float height = relativeHeight * histogramHeight;
-        float y = 10 + histogramHeight - height;
+        float height = relativeHeight * (histogramHeight - 10); // 10 pixels from top for padding
+        float y = histogramHeight - height;
         g.fillRect(x, y, binWidth + 0.5f, height);
 
     }
 
-    float zeroLoc = float(pre_ms) / float(pre_ms + post_ms) * histogramWidth;
-    
-    g.setColour(Colours::white);
-    g.drawLine(zeroLoc, 0, zeroLoc, getHeight(), 2.0);
-
-    g.setColour(Colour(195, 195, 195));
-    g.drawRect(Rectangle<float>(0, 0, histogramWidth, histogramHeight), 2.0f);
+    g.setColour (findColour (ThemeColours::outline));
+    g.drawRoundedRectangle (localBounds, 3.0f, 1.0f);
 
 }
 
@@ -326,7 +320,7 @@ void Histogram::save()
 
         FileOutputStream f(file);
 
-        output.writeAsJSON(f, 4, false, 4);
+        output.writeAsJSON(f, JSON::FormatOptions{}.withIndentLevel(4).withSpacing(JSON::Spacing::multiLine).withMaxDecimalPlaces(4));
     }
 }
 

@@ -29,15 +29,20 @@ LatencyHistogram::LatencyHistogram()
     : GenericProcessor("Latency Histogram")
 {
 
-    addIntParameter(Parameter::STREAM_SCOPE, "ttl_a", "The first TTL line to measure", 1, 1, 16);
-    addIntParameter(Parameter::STREAM_SCOPE, "ttl_b", "The second TTL line to measure", 2, 1, 16);
-
 }
 
 
 LatencyHistogram::~LatencyHistogram()
 {
 
+}
+
+
+void LatencyHistogram::registerParameters()
+{
+    addTtlLineParameter (Parameter::STREAM_SCOPE, "ttl_a", "TTL A", "The first TTL line to measure", 16);
+    addTtlLineParameter (Parameter::STREAM_SCOPE, "ttl_b", "TTL B", "The second TTL line to measure", 16);
+    getStreamParameter ("ttl_b")->currentValue = 1; // set default value for ttl_b to 1
 }
 
 
@@ -88,7 +93,7 @@ void LatencyHistogram::handleTTLEvent(TTLEventPtr event)
     {
 
         // convert to 1-based line numbers
-        const int line = event->getLine() + 1;
+        const int line = event->getLine();
         double timeInMs = event->getSampleNumber() / stream->getSampleRate() * 1000.0f;
         
 		const int ttl_a = stream->getParameter("ttl_a")->getValue();
