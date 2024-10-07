@@ -23,80 +23,74 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "LatencyHistogramEditor.h"
 #include "LatencyHistogram.h"
 
-LatencyHistogramEditor::LatencyHistogramEditor(GenericProcessor* parentNode) 
-    : GenericEditor(parentNode)
+LatencyHistogramEditor::LatencyHistogramEditor (GenericProcessor* parentNode)
+    : GenericEditor (parentNode)
 {
-    
     addTtlLineParameterEditor (Parameter::STREAM_SCOPE, "ttl_a", 15, 30);
     addTtlLineParameterEditor (Parameter::STREAM_SCOPE, "ttl_b", 15, 75);
 
-	for (auto ed : parameterEditors)
-	{
-		ed->setLayout (ParameterEditor::Layout::nameOnTop);
-		ed->setSize (75, 40);
-	}
-    
+    for (auto ed : parameterEditors)
+    {
+        ed->setLayout (ParameterEditor::Layout::nameOnTop);
+        ed->setSize (75, 40);
+    }
+
     desiredWidth = 260;
-
 }
-
 
 void LatencyHistogramEditor::updateSettings()
 {
+    histograms.clear();
 
-	histograms.clear();
+    for (auto stream : getProcessor()->getDataStreams())
+    {
+        Histogram* h = new Histogram (stream->getStreamId());
+        histograms.add (h);
+        h->setBounds (105, 30, 150, 90);
+        addAndMakeVisible (h);
+    }
 
-	for (auto stream : getProcessor()->getDataStreams())
-	{
-		Histogram* h = new Histogram(stream->getStreamId());
-		histograms.add(h);
-		h->setBounds(105, 30, 150, 90);
-		addAndMakeVisible(h);
-	}
-
-	selectedStreamHasChanged();
-
+    selectedStreamHasChanged();
 }
 
 void LatencyHistogramEditor::selectedStreamHasChanged()
 {
-
-	for (auto hist : histograms)
-	{
-		if (hist->streamId == selectedStream)
-		{
-			hist->setVisible(true);
-		}
-		else
-		{
-			hist->setVisible(false);
-		}
-	}
+    for (auto hist : histograms)
+    {
+        if (hist->streamId == selectedStream)
+        {
+            hist->setVisible (true);
+        }
+        else
+        {
+            hist->setVisible (false);
+        }
+    }
 }
 
-void LatencyHistogramEditor::addLatency(uint16 streamId, double latencyMs)
+void LatencyHistogramEditor::addLatency (uint16 streamId, double latencyMs)
 {
-	for (auto hist : histograms)
-	{
-		if (hist->streamId == streamId)
-		{
-			hist->addLatency(latencyMs);
-		}
-	}
+    for (auto hist : histograms)
+    {
+        if (hist->streamId == streamId)
+        {
+            hist->addLatency (latencyMs);
+        }
+    }
 }
 
 void LatencyHistogramEditor::startAcquisition()
 {
-	for (auto hist : histograms)
-	{
-		hist->startTimer(10);
-	}
+    for (auto hist : histograms)
+    {
+        hist->startTimer (10);
+    }
 }
 
 void LatencyHistogramEditor::stopAcquisition()
 {
-	for (auto hist : histograms)
-	{
-		hist->stopTimer();
-	}
+    for (auto hist : histograms)
+    {
+        hist->stopTimer();
+    }
 }

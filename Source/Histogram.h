@@ -33,47 +33,46 @@
     Displays the latency histogram
  
  */
-class Histogram : public Component, 
-    public Timer
+class Histogram : public Component,
+                  public Timer
 {
 public:
-    
     /** Constructor */
-    Histogram(uint16 streamId);
-    
+    Histogram (uint16 streamId);
+
     /** Destructor */
-    ~Histogram() { }
-    
+    ~Histogram() {}
+
     /** Draws the histogram */
-    void paint(Graphics& g);
-    
+    void paint (Graphics& g);
+
     /** Called when histogram is resized */
     void resized();
-    
+
     /** Adds a latency */
-    void addLatency(double latencyInMs);
-    
+    void addLatency (double latencyInMs);
+
     /** Clears the display*/
     void clear();
 
     /** Saves the histogram data*/
     void save();
-    
+
     /** Sets the window size*/
-    void setWindowSizeMs(int pre_ms, int post_ms);
-    
+    void setWindowSizeMs (int pre_ms, int post_ms);
+
     /** Sets the bin size in ms*/
-    void setBinSizeMs(int ms);
+    void setBinSizeMs (int ms);
 
     /** Listens for mouse movements */
-    void mouseMove(const MouseEvent& event);
-    
+    void mouseMove (const MouseEvent& event);
+
     /** Listens for mouse movements */
-    void mouseExit(const MouseEvent& event);
+    void mouseExit (const MouseEvent& event);
 
     /** Listens for mouse clicks */
-    void mouseDown(const MouseEvent& event);
-    
+    void mouseDown (const MouseEvent& event);
+
     /** Stream ID for this histogram */
     uint16 streamId;
 
@@ -84,27 +83,26 @@ public:
     DynamicObject getInfo();
 
 private:
-
     /** Animates the component */
-	void timerCallback();
-    
+    void timerCallback();
+
     /** Recomputes temporal offsets */
     void recompute();
-    
+
     /** Recomputes bin counts */
-    void recount(bool full=true);
-    
+    void recount (bool full = true);
+
     std::unique_ptr<Label> hoverLabel;
     std::unique_ptr<Label> statsLabel;
-    
+
     Array<double> binEdges;
-    
+
     Array<double> relativeTimes;
-    
+
     Array<int> counts;
 
     int hoverBin = -1;
-    
+
     int pre_ms;
     int post_ms;
     int bin_size_ms;
@@ -119,9 +117,6 @@ private:
     float numTrials = 0;
 
     int maxCount = 1;
-
 };
 
-
-
-#endif  // Histogram_H__
+#endif // Histogram_H__

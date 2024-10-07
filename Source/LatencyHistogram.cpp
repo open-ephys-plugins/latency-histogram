@@ -24,19 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LatencyHistogramEditor.h"
 
-
 LatencyHistogram::LatencyHistogram()
-    : GenericProcessor("Latency Histogram")
+    : GenericProcessor ("Latency Histogram")
 {
-
 }
-
 
 LatencyHistogram::~LatencyHistogram()
 {
-
 }
-
 
 void LatencyHistogram::registerParameters()
 {
@@ -45,80 +40,67 @@ void LatencyHistogram::registerParameters()
     getStreamParameter ("ttl_b")->currentValue = 1; // set default value for ttl_b to 1
 }
 
-
 AudioProcessorEditor* LatencyHistogram::createEditor()
 {
-    editor = std::make_unique<LatencyHistogramEditor>(this);
+    editor = std::make_unique<LatencyHistogramEditor> (this);
     return editor.get();
 }
 
-
 void LatencyHistogram::updateSettings()
 {
-    settings.update(getDataStreams()); // resets settings to default values
+    settings.update (getDataStreams()); // resets settings to default values
 }
-
 
 bool LatencyHistogram::startAcquisition()
 {
-	for (auto stream : getDataStreams())
-	{
+    for (auto stream : getDataStreams())
+    {
         settings[stream->getStreamId()]->reset();
-	}
+    }
 
     return true;
 }
 
-
-void LatencyHistogram::process(AudioBuffer<float>& buffer)
+void LatencyHistogram::process (AudioBuffer<float>& buffer)
 {
-
-    checkForEvents(true);
-
+    checkForEvents (true);
 }
 
-
-void LatencyHistogram::handleTTLEvent(TTLEventPtr event)
+void LatencyHistogram::handleTTLEvent (TTLEventPtr event)
 {
     const bool state = event->getState();
 
-    if (!state)
-		return; // only handle rising edges
-    
+    if (! state)
+        return; // only handle rising edges
+
     const uint16 streamId = event->getStreamId();
-    
-    DataStream* stream = getDataStream(streamId);
-    
+
+    DataStream* stream = getDataStream (streamId);
+
     if (stream != nullptr)
     {
-
         // convert to 1-based line numbers
         const int line = event->getLine();
         double timeInMs = event->getSampleNumber() / stream->getSampleRate() * 1000.0f;
-        
-		const int ttl_a = stream->getParameter("ttl_a")->getValue();
-		const int ttl_b = stream->getParameter("ttl_b")->getValue();
 
-		if (line == ttl_a)
-		{
-			settings[streamId]->lastTimeTTLA = timeInMs;
-		}
-		else if (line == ttl_b)
-		{
+        const int ttl_a = stream->getParameter ("ttl_a")->getValue();
+        const int ttl_b = stream->getParameter ("ttl_b")->getValue();
 
+        if (line == ttl_a)
+        {
+            settings[streamId]->lastTimeTTLA = timeInMs;
+        }
+        else if (line == ttl_b)
+        {
             double latencyMs = timeInMs - settings[streamId]->lastTimeTTLA;
-            
+
             if (latencyMs < maxWindowMs)
             {
-				LatencyHistogramEditor* editor = static_cast<LatencyHistogramEditor*>(getEditor());
-                editor->addLatency(streamId, latencyMs);
+                LatencyHistogramEditor* editor = static_cast<LatencyHistogramEditor*> (getEditor());
+                editor->addLatency (streamId, latencyMs);
             }
 
             settings[streamId]->reset();
-		}
+        }
     }
-
-    
 }
-
-
